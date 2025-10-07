@@ -1,0 +1,37 @@
+{
+  "name": "multi-user-e-commerce-platform",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "npx ts-node --esm src/app.ts "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Afecom/Multi-user-e-commerce-platform.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Afecom/Multi-user-e-commerce-platform/issues"
+  },
+  "homepage": "https://github.com/Afecom/Multi-user-e-commerce-platform#readme",
+  "dependencies": {
+    "argon": "^2.0.21",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3",
+    "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  }
+}
