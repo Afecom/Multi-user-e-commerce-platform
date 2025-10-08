@@ -9,19 +9,22 @@ datasource db {
 }
 
 model users {
-  first_name    String            @db.VarChar(255)
-  last_name     String            @db.VarChar(255)
-  email         String            @unique @db.VarChar(255)
-  password_hash String            @db.VarChar(255)
-  created_at    DateTime?         @db.Time(6)
-  updated_at    DateTime?         @db.Time(6)
-  id            String            @id @default(uuid())
-  seller        seller_profiles[]
+  id            String           @id @default(uuid())
+  first_name    String
+  last_name     String
+  email         String           @unique
+  password_hash String
+  created_at    DateTime         @default(now())
+  updated_at    DateTime         @updatedAt
+  seller        seller_profiles?
+  carts         carts[]
+  orders        orders[]
+  reviews       reviews[]
 }
 
 model seller_profiles {
   id          String       @id @default(uuid())
-  seller_id   String
+  seller_id   String       @unique
   seller      users        @relation(fields: [seller_id], references: [id])
   store_name  String       @unique
   description String
@@ -29,14 +32,111 @@ model seller_profiles {
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt
   category    categories[]
+  product     products[]
 }
 
 model categories {
-  id                String           @id @default(uuid())
-  seller            seller_profiles? @relation(fields: [seller_profilesId], references: [id])
-  seller_profilesId String?
-  name              String
-  descritpion       String?
-  created_at        DateTime         @default(now())
-  updated_at        DateTime         @updatedAt
+  id                 String           @id @default(uuid())
+  seller             seller_profiles? @relation(fields: [seller_profiles_id], references: [id])
+  seller_profiles_id String?
+  name               String
+  descritpion        String?
+  created_at         DateTime         @default(now())
+  updated_at         DateTime         @updatedAt
+  product            products[]
+}
+
+model products {
+  id          String          @id @default(uuid())
+  seller      seller_profiles @relation(fields: [seller_id], references: [id])
+  seller_id   String
+  name        String
+  description String
+  stock       Int?
+  image_URL   String
+  price       Decimal
+  rating      Decimal
+  category    categories[]
+  cart_items  cart_items[]
+  orders      order_items[]
+  reviews     reviews[]
+  created_at  DateTime        @default(now())
+  updated_at  DateTime        @updatedAt
+}
+
+model carts {
+  id         String       @id @default(uuid())
+  user       users        @relation(fields: [users_id], references: [id])
+  users_id   String
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  cart_items cart_items[]
+}
+
+model cart_items {
+  id         String   @id @default(uuid())
+  cart       carts    @relation(fields: [cart_id], references: [id])
+  cart_id    String
+  product    products @relation(fields: [product_id], references: [id])
+  product_id String
+  quantity   Int
+}
+
+model orders {
+  id             String           @id @default(uuid())
+  user           users            @relation(fields: [user_id], references: [id])
+  user_id        String
+  total_amount   Decimal
+  status         order_status     @default(pending)
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
+  order_items    order_items[]
+  payment_method payment_methods?
+}
+
+model order_items {
+  id         String   @id @default(uuid())
+  order_id   String
+  order      orders   @relation(fields: [order_id], references: [id])
+  product_id String
+  product    products @relation(fields: [product_id], references: [id])
+  unit_price Decimal
+  quantity   Int
+}
+
+model payment_methods {
+  id             String         @id @default(uuid())
+  order_id       String         @unique
+  order          orders         @relation(fields: [order_id], references: [id])
+  status         payment_status @default(to_be_paid)
+  amount         Decimal
+  transaction_id String
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+}
+
+model reviews {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       users    @relation(fields: [user_id], references: [id])
+  product_id String
+  product    products @relation(fields: [product_id], references: [id])
+  rating     Decimal
+  comment    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+enum order_status {
+  pending
+  delivered
+  cancelled
+  paid
+}
+
+enum payment_status {
+  paid
+  to_be_paid
+  cancelled
+  failed
 }
