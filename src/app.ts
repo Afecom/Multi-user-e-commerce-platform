@@ -1,7 +1,9 @@
 import express from 'express'
-import db_envs from './configs/dbenv.config.js'
+import { PrismaClient } from './generated/prisma/client.js'
 import dotenv from 'dotenv'
 dotenv.config()
+
+const prisma = new PrismaClient()
 
 const app = express()
 
@@ -12,10 +14,10 @@ app.use('/', (req, res) => {
 
 const db_connection = async () => {
     try {
-        await db_envs['dev_db'].authenticate()
+        await prisma.$connect()
         console.log("Database connected successfully")
     } catch (error) {
-        console.log("Couldn't connect to the database", error)
+        console.error("Couldn't connect to the database", error)
         process.exit(1)
     }
 }
