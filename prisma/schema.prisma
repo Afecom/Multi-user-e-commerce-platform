@@ -9,11 +9,34 @@ datasource db {
 }
 
 model users {
-  first_name    String    @db.VarChar(255)
-  last_name     String    @db.VarChar(255)
-  email         String    @unique @db.VarChar(255)
-  password_hash String    @db.VarChar(255)
-  created_at    DateTime? @db.Time(6)
-  updated_at    DateTime? @db.Time(6)
-  id            String    @id @default(uuid())
+  first_name    String            @db.VarChar(255)
+  last_name     String            @db.VarChar(255)
+  email         String            @unique @db.VarChar(255)
+  password_hash String            @db.VarChar(255)
+  created_at    DateTime?         @db.Time(6)
+  updated_at    DateTime?         @db.Time(6)
+  id            String            @id @default(uuid())
+  seller        seller_profiles[]
+}
+
+model seller_profiles {
+  id          String       @id @default(uuid())
+  seller_id   String
+  seller      users        @relation(fields: [seller_id], references: [id])
+  store_name  String       @unique
+  description String
+  rating      Decimal
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+  category    categories[]
+}
+
+model categories {
+  id                String           @id @default(uuid())
+  seller            seller_profiles? @relation(fields: [seller_profilesId], references: [id])
+  seller_profilesId String?
+  name              String
+  descritpion       String?
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
 }
