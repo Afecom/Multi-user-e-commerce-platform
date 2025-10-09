@@ -1,10 +1,12 @@
 import express from 'express';
-import { PrismaClient } from './generated/prisma/client.js';
+import { PrismaClient } from '@prisma/client';
+import index_router from './routes/index.route.js';
 import dotenv from 'dotenv';
 dotenv.config();
 const prisma = new PrismaClient();
 const app = express();
 app.use(express.json());
+app.use('/api/v1', index_router);
 app.use('/', (req, res) => {
     res.send("Hello world");
 });

@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -14,6 +13,7 @@ model users {
   last_name     String
   email         String           @unique
   password_hash String
+  role          user_role?       @default(customer)
   created_at    DateTime         @default(now())
   updated_at    DateTime         @updatedAt
   seller        seller_profiles?
@@ -139,4 +139,10 @@ enum payment_status {
   to_be_paid
   cancelled
   failed
+}
+
+enum user_role {
+  customer
+  admin
+  seller
 }

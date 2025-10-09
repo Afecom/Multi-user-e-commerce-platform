@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "node dist/app.ts",
+    "build-start": "npm run build && npm run start",
+    "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
     "migrate": "npx prisma migrate dev",
     "generate": "npx prisma generate"
@@ -39,6 +40,7 @@
     "prisma": "^6.17.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "zod": "^4.1.12"
   }
 }
