@@ -5,7 +5,11 @@ export declare const create_user_schema: z.ZodObject<{
     last_name: z.ZodString;
     email: z.ZodEmail;
     password: z.ZodString;
-    role: z.ZodOptional<z.ZodString>;
+    role: z.ZodDefault<z.ZodEnum<{
+        customer: "customer";
+        admin: "admin";
+        seller: "seller";
+    }>>;
 }, z.core.$strip>;
 type create_user_request = z.infer<typeof create_user_schema>;
 export declare const sign_up: (req: Request<{}, {}, create_user_request>, res: Response) => Promise<void>;
