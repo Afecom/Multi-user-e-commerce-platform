@@ -1,8 +1,9 @@
 import express, {} from 'express';
-import { sign_up, login, update_user } from "../controllers/auth.controller.js";
+import { sign_up, login, update_user, get_user, get_user_schema, create_user_schema, get_all_users } from "../controllers/auth.controller.js";
 import validate from "../middlewares/runtime_request_body_validator.js";
-import { create_user_schema } from "../controllers/auth.controller.js";
 const auth_router = express.Router();
 auth_router.post('/', validate(create_user_schema), sign_up);
+auth_router.get('/', validate(get_user_schema), get_user);
+auth_router.get('/users', get_all_users);
 export default auth_router;
 //# sourceMappingURL=auth.route.js.map
