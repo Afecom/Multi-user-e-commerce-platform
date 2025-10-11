@@ -1,7 +1,9 @@
 import type { Request, Response } from "express"
-import { $Enums, PrismaClient, user_role } from "@prisma/client"
+import { $Enums, PrismaClient, user_role } from '@prisma/client'
 import { z } from 'zod'
 import { hash_password } from "../utils/password_hasher.js"
+import { verify_password } from "../utils/password_hasher.js"
+import { sign_token} from "../services/token_sign-verify.js"
 
 const prisma = new PrismaClient()
 
@@ -50,27 +52,56 @@ type user_login_response = {
     user?: user
 }
 
-export const sign_up = async (req: Request<{}, {}, create_user_request>, res: Response<{message: string, user?: user, error?: unknown}>) => {
+export const sign_up = async (req: Request<{}, {}, create_user_request>, res: Response<{message: string, user?: user, error?: unknown}>): Promise<Response> => {
     const { first_name, last_name, email, password, role} = req.body
     try {
         const hashed_password = await hash_password(password)
         const user = await prisma.users.create({data: {first_name, last_name, email, password_hash: hashed_password, role}})
         const { password_hash, ...rest_user } = user
-        res.status(201).json({
+        return res.status(201).json({
             message: "User created successfully",
             user: rest_user
         })
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             message: "Failed to create user",
             error
         })
     }
 }
-export const login = async (req: Request<{}, {}, login_user_request>, res: Response<user_login_response>) => {
+export const login = async (req: Request<{}, {}, login_user_request>, res: Response<user_login_response>): Promise<Response> => {
     const { email, password } = req.body
+    try {
+        const user = await prisma.users.findUnique({
+            where: { email }
+        })
+        if(!user) return res.status(401).json({ message: "Invalid credentials provided" })
+        const is_password_correct: boolean = await verify_password(user.password_hash, password)
+        if(is_password_correct){
+            const user_payload = {
+                user_id: user.id,
+                user_email: user.email,
+                user_role: user.role
+            }
+            const access_token: string = sign_token(user_payload).access_token
+            const refresh_token: string = sign_token(user_payload).refresh_token
+            const { password_hash, ...rest_user } = user
+            return res.status(200).json({
+                message: "User logged in successfully",
+                access_token,
+                refresh_token,
+                user: rest_user
+            })
+        }
+        return res.status(401).json({ message: "Invalid credentials provided" })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Couldn't perform a login operation",
+            error
+        })
+    }
 }
-export const update_user = async (req: Request<{}, {}, update_user_request>, res: Response<{message: string, updated_user?: user, error?: unknown}>) => {
+export const update_user = async (req: Request<{}, {}, update_user_request>, res: Response<{message: string, updated_user?: user, error?: unknown}>): Promise<Response> => {
     const { first_name, last_name, email, role } = req.body
     try {
         const updated_user = await prisma.users.update({
@@ -78,18 +109,18 @@ export const update_user = async (req: Request<{}, {}, update_user_request>, res
             data: { first_name, last_name, role }
         })
         const { password_hash, ...rest_user } = updated_user
-        res.status(200).json({
+        return res.status(200).json({
             message: "User updated successfully",
             updated_user: rest_user
         })
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             message: "Couldn't update the user",
             error
         })
     }
 }
-export const get_user = async (req: Request<{}, {}, get_user_request>, res: Response<{user?: user, message: string, error?: unknown}>) => {
+export const get_user = async (req: Request<{}, {}, get_user_request>, res: Response<{user?: user, message: string, error?: unknown}>): Promise<Response> => {
     const { email } = req.body
     try {
         const user = await prisma.users.findUnique({
@@ -97,18 +128,19 @@ export const get_user = async (req: Request<{}, {}, get_user_request>, res: Resp
         })
         if(!user) return res.status(404).json({message: "User not found"})
         const { password_hash, ...rest_user } = user
-        res.status(200).json({
+        return res.status(200).json({
             message: "User found successfully",
             user: rest_user
         })
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             message: "Failed to get user",
             error
         })
     }
 }
 
+//Admin purpose only
 export const get_all_users = async (req: Request, res: Response<{message: string, error?: unknown, users?: user[]}>): Promise<Response> => {
     try {
         let no_pass_users: user[] = []
