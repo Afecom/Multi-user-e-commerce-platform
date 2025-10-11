@@ -1,5 +1,5 @@
 import type { Request, Response } from "express"
-import { PrismaClient, user_role } from "@prisma/client"
+import { $Enums, PrismaClient, user_role } from "@prisma/client"
 import { z } from 'zod'
 import { hash_password } from "../utils/password_hasher.js"
 
@@ -33,15 +33,24 @@ type create_user_request = z.infer<typeof create_user_schema>
 type get_user_request = z.infer<typeof get_user_schema>
 type update_user_request = z.infer<typeof update_user_schema>
 type login_user_request = z.infer<typeof login_user_schema>
+type user = {
+    id: string,
+    first_name: string,
+    last_name: string,
+    email: string,
+    role: $Enums.user_role,
+    created_at: Date,
+    updated_at: Date
+}
 type user_login_response = {
     message: string,
     access_token?: string,
     refresh_token?: string,
     error?: unknown,
-    user?: unknown
+    user?: user
 }
 
-export const sign_up = async (req: Request<{}, {}, create_user_request>, res: Response<{message: string, user?: unknown, error?: unknown}>) => {
+export const sign_up = async (req: Request<{}, {}, create_user_request>, res: Response<{message: string, user?: user, error?: unknown}>) => {
     const { first_name, last_name, email, password, role} = req.body
     try {
         const hashed_password = await hash_password(password)
@@ -61,7 +70,7 @@ export const sign_up = async (req: Request<{}, {}, create_user_request>, res: Re
 export const login = async (req: Request<{}, {}, login_user_request>, res: Response<user_login_response>) => {
     const { email, password } = req.body
 }
-export const update_user = async (req: Request<{}, {}, update_user_request>, res: Response<{message: string, updated_user?: unknown, error?: unknown}>) => {
+export const update_user = async (req: Request<{}, {}, update_user_request>, res: Response<{message: string, updated_user?: user, error?: unknown}>) => {
     const { first_name, last_name, email, role } = req.body
     try {
         const updated_user = await prisma.users.update({
@@ -80,7 +89,7 @@ export const update_user = async (req: Request<{}, {}, update_user_request>, res
         })
     }
 }
-export const get_user = async (req: Request<{}, {}, get_user_request>, res: Response<{user?: unknown, message: string, error?: unknown}>) => {
+export const get_user = async (req: Request<{}, {}, get_user_request>, res: Response<{user?: user, message: string, error?: unknown}>) => {
     const { email } = req.body
     try {
         const user = await prisma.users.findUnique({
@@ -100,9 +109,9 @@ export const get_user = async (req: Request<{}, {}, get_user_request>, res: Resp
     }
 }
 
-export const get_all_users = async (req: Request, res: Response<{message: string, error?: unknown, users?: unknown[]}>): Promise<Response> => {
+export const get_all_users = async (req: Request, res: Response<{message: string, error?: unknown, users?: user[]}>): Promise<Response> => {
     try {
-        let no_pass_users: unknown[] = []
+        let no_pass_users: user[] = []
         const users = await prisma.users.findMany()
         if(!users) return res.status(404).json({ message: "No user was found" })
         users.map((user) => {

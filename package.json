@@ -28,7 +28,6 @@
     "@prisma/client": "^6.17.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.10",
     "pg": "^8.16.3",
     "sequelize": "^6.37.7",
@@ -37,8 +36,10 @@
   },
   "devDependencies": {
     "@types/argon2": "^0.14.1",
+    "@types/jsonwebtoken": "^9.0.10",
     "argon": "^2.0.21",
     "argon2": "^0.44.0",
+    "jsonwebtoken": "^9.0.2",
     "prisma": "^6.17.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",

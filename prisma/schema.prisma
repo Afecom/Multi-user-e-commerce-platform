@@ -13,7 +13,7 @@ model users {
   last_name     String
   email         String           @unique
   password_hash String
-  role          user_role?       @default(customer)
+  role          user_role        @default(customer)
   created_at    DateTime         @default(now())
   updated_at    DateTime         @updatedAt
   seller        seller_profiles?

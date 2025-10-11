@@ -1,5 +1,5 @@
 import { PrismaClient, user_role } from "@prisma/client";
-import { z } from 'zod';
+import { uuid, z } from 'zod';
 import { hash_password } from "../utils/password_hasher.js";
 const prisma = new PrismaClient();
 export const create_user_schema = z.object({
@@ -22,15 +22,24 @@ export const login_user_schema = z.object({
     email: z.email(),
     password: z.string()
 });
+const user_schema = z.object({
+    id: z.uuid(),
+    first_name: z.string(),
+    last_name: z.string(),
+    email: z.email(),
+    role: z.enum(user_role),
+    created_at: z.date(),
+    updated_at: z.date()
+});
 export const sign_up = async (req, res) => {
     const { first_name, last_name, email, password, role } = req.body;
     try {
         const hashed_password = await hash_password(password);
         const user = await prisma.users.create({ data: { first_name, last_name, email, password_hash: hashed_password, role } });
-        const { password_hash, ...rest_user } = user;
+        // const { password_hash, ...rest_user } = user
         res.status(201).json({
             message: "User created successfully",
-            user: rest_user
+            user
         });
     }
     catch (error) {
@@ -50,10 +59,10 @@ export const update_user = async (req, res) => {
             where: { email },
             data: { first_name, last_name, role }
         });
-        const { password_hash, ...rest_user } = updated_user;
+        // const { password_hash, ...rest_user } = updated_user
         res.status(200).json({
             message: "User updated successfully",
-            updated_user: rest_user
+            updated_user
         });
     }
     catch (error) {
@@ -71,10 +80,10 @@ export const get_user = async (req, res) => {
         });
         if (!user)
             return res.status(404).json({ message: "User not found" });
-        const { password_hash, ...rest_user } = user;
+        // const { password_hash, ...rest_user } = user
         res.status(200).json({
             message: "User found successfully",
-            user: rest_user
+            user
         });
     }
     catch (error) {
