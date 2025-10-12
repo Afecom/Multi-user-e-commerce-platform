@@ -2,6 +2,7 @@ import type { $Enums } from '@prisma/client'
 import dotenv from 'dotenv'
 dotenv.config()
 import jwt from "jsonwebtoken"
+import { string } from 'zod'
 
 interface payload {
     user_id: string,
@@ -20,8 +21,13 @@ export const sign_token = (payload: payload): tokens => {
     }
 }
 
-export const verify_token = (token: string, type: string) => {
-    if(type === "access") return jwt.verify(token, jwt_refresh_secret)
-    if (type === "refresh") return jwt.verify(token, jwt_refresh_secret)
-    return "Invalid token type"
+export const verify_token = (token: string, type: "access" | "refresh"): payload => {
+    try {
+        const secret = type === "access"? jwt_access_secret : jwt_refresh_secret
+        const decoded = jwt.verify(token, secret)
+        if(!decoded || typeof decoded === "string") throw new Error("Invalid signiture or token")
+        return decoded as payload
+    } catch (error) {
+        throw error
+    }
 }

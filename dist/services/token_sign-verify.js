@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import jwt from "jsonwebtoken";
+import { string } from 'zod';
 const jwt_access_secret = process.env.JWT_ACCESS_SECRET;
 const jwt_refresh_secret = process.env.JWT_REFRESH_SECRET;
 export const sign_token = (payload) => {
@@ -11,10 +12,15 @@ export const sign_token = (payload) => {
     };
 };
 export const verify_token = (token, type) => {
-    if (type === "access")
-        return jwt.verify(token, jwt_refresh_secret);
-    if (type === "refresh")
-        return jwt.verify(token, jwt_refresh_secret);
-    return "Invalid token type";
+    try {
+        const secret = type === "access" ? jwt_access_secret : jwt_refresh_secret;
+        const decoded = jwt.verify(token, secret);
+        if (!decoded || typeof decoded === "string")
+            throw new Error("Invalid signiture or token");
+        return decoded;
+    }
+    catch (error) {
+        throw error;
+    }
 };
 //# sourceMappingURL=token_sign-verify.js.map
