@@ -11,6 +11,8 @@ export declare const create_user_schema: z.ZodObject<{
         admin: "admin";
         seller: "seller";
     }>>;
+    store_name: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 export declare const get_user_schema: z.ZodObject<{
     email: z.ZodEmail;
@@ -24,6 +26,8 @@ export declare const update_user_schema: z.ZodObject<{
         admin: "admin";
         seller: "seller";
     }>>;
+    store_name: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 export declare const login_user_schema: z.ZodObject<{
     email: z.ZodEmail;

@@ -28,7 +28,7 @@ model seller_profiles {
   seller      users        @relation(fields: [seller_id], references: [id])
   store_name  String       @unique
   description String
-  rating      Decimal
+  rating      Decimal?
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt
   category    categories[]
