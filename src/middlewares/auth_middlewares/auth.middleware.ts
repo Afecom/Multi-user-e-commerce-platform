@@ -1,4 +1,4 @@
-import { verify_token } from "../services/token_sign-verify.js";
+import { verify_token } from "../../services/token_sign-verify.js";
 import type { Request, Response, NextFunction } from 'express'
 
 export const role_checkpoint = (role: string) => {

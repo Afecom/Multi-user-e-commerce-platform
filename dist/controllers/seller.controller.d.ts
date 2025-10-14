@@ -1,5 +1,6 @@
 import type { Decimal } from '@prisma/client/runtime/library';
 import type { Request, Response } from 'express';
+import type { request } from '../middlewares/access_control_middlewares/admin-user_access_control.js';
 import { z } from 'zod';
 export declare const get_seller_schema: z.ZodObject<{
     email: z.ZodEmail;
@@ -15,7 +16,7 @@ type seller = {
     rating: Decimal | null;
 };
 export declare const update_seller: (req: Request, res: Response) => Promise<void>;
-export declare const get_seller: (req: Request<{}, {}, get_seller_request>, res: Response<{
+export declare const get_seller: (req: request<{}, {}, get_seller_request>, res: Response<{
     message: string;
     seller?: seller;
     error?: unknown;

@@ -3,7 +3,7 @@ import { sign_up, login, update_user, get_user, get_user_schema, create_user_sch
     login_user_schema
 } from "../controllers/auth.controller.js";
 import validate from "../middlewares/runtime_request_body_validator.js";
-import { role_checkpoint } from '../middlewares/auth.middleware.js';
+import { role_checkpoint } from '../middlewares/auth_middlewares/auth.middleware.js';
 
 const auth_router: Router = express.Router()
 

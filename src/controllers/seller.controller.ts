@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import type { Decimal } from '@prisma/client/runtime/library'
 import type { Request, Response } from 'express'
+import { verify_token } from '../services/token_sign-verify.js'
+import type { request } from '../middlewares/access_control_middlewares/admin-user_access_control.js'
 import { z } from 'zod'
 
 const prisma = new PrismaClient()
@@ -11,34 +13,25 @@ export const get_seller_schema = z.object({
 
 type get_seller_request = z.infer<typeof get_seller_schema>
 type seller = {
-    id: string;
-    created_at: Date;
-    updated_at: Date;
-    seller_id: string;
-    store_name: string;
-    description: string;
+    id: string
+    created_at: Date
+    updated_at: Date
+    seller_id: string
+    store_name: string
+    description: string
     rating: Decimal | null
 }
 
-// export const create_seller = async (req: Request, res: Response) => {}
-
 export const update_seller = async (req: Request, res: Response) => {}
 
-export const get_seller = async (req: Request<{}, {}, get_seller_request>, res: Response<{message: string, seller?: seller, error?: unknown}>): Promise<Response> => {
-    const { email } = req.body
+export const get_seller = async (req: request<{}, {}, get_seller_request>, res: Response<{message: string, seller?: seller, error?: unknown}>): Promise<Response> => {
     try {
-        const user = await prisma.users.findUnique({
-            where: { email }
-        })
-        if (!user) return res.status(404).json({message: "User not found with the provided email"})
-        const seller = await prisma.seller_profiles.findUnique({
-            where: {
-                seller_id: user.id
-            }
-        })
-        if(!seller) return res.status(404).json({message: "Seller not found with the provided email"})
+        const user = req.target_user
+        if(!user) return res.status(404).json({message: "A user was not found with the provided email"})
+        const seller = await prisma.seller_profiles.findUnique({where: {seller_id: user.id}})
+        if(!seller) return res.status(404).json({message: "A seller profile was not found for the user with the email provided"})
         return res.status(200).json({
-            message: "Seller found successfully",
+            message: "Seller profile found successfully",
             seller
         })
     } catch (error) {

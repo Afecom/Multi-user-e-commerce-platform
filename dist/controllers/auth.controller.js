@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { hash_password } from "../utils/password_hasher.js";
 import { verify_password } from "../utils/password_hasher.js";
 import { sign_token } from "../services/token_sign-verify.js";
-import { where } from "sequelize";
 const prisma = new PrismaClient();
 export const create_user_schema = z.object({
     first_name: z.string(),
