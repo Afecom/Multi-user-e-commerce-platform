@@ -30,6 +30,12 @@ export declare const get_sellers: (req: Request, res: Response<{
     sellers?: seller[];
     error?: unknown;
 }, Record<string, any>>>;
-export declare const delete_seller: (req: Request, res: Response) => Promise<void>;
+export declare const delete_seller: (req: request<{}, {}, get_seller_request>, res: Response<{
+    message: string;
+    error?: unknown;
+}>) => Promise<Response<{
+    message: string;
+    error?: unknown;
+}, Record<string, any>>>;
 export {};
 //# sourceMappingURL=seller.controller.d.ts.map

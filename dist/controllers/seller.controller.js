@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { verify_token } from '../services/token_sign-verify.js';
 import { z } from 'zod';
 const prisma = new PrismaClient();
 export const get_seller_schema = z.object({
@@ -64,5 +63,23 @@ export const get_sellers = async (req, res) => {
         });
     }
 };
-export const delete_seller = async (req, res) => { };
+export const delete_seller = async (req, res) => {
+    try {
+        const user = req.target_user;
+        if (!user)
+            return res.status(404).json({ message: "A user was not found with the provided email" });
+        await prisma.seller_profiles.delete({
+            where: { seller_id: user.id }
+        });
+        return res.status(203).json({
+            message: "Seller Profile deleted successfully"
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            message: "Internal server error",
+            error
+        });
+    }
+};
 //# sourceMappingURL=seller.controller.js.map

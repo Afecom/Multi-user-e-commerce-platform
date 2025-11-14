@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import type { Decimal } from '@prisma/client/runtime/library'
 import type { Request, Response } from 'express'
-import { verify_token } from '../services/token_sign-verify.js'
 import type { request } from '../middlewares/access_control_middlewares/admin-user_access_control.js'
 import { z } from 'zod'
 
@@ -79,4 +78,20 @@ export const get_sellers = async (req: Request, res: Response<{message: string, 
     }
 }
 
-export const delete_seller = async (req: Request, res: Response) => {}
+export const delete_seller = async (req: request<{}, {}, get_seller_request>, res: Response<{message: string, error?: unknown}>) => {
+    try {
+        const user = req.target_user
+        if(!user) return res.status(404).json({message: "A user was not found with the provided email"})
+        await prisma.seller_profiles.delete({
+            where: {seller_id: user.id}
+        })
+        return res.status(203).json({
+            message: "Seller Profile deleted successfully"
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal server error",
+            error
+        })
+    }
+}
