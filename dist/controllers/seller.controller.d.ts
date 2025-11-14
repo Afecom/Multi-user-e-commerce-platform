@@ -21,7 +21,15 @@ export declare const get_seller: (req: request<{}, {}, get_seller_request>, res:
     seller?: seller;
     error?: unknown;
 }>) => Promise<Response>;
-export declare const get_sellers: (req: Request, res: Response) => Promise<void>;
+export declare const get_sellers: (req: Request, res: Response<{
+    message: string;
+    sellers?: seller[];
+    error?: unknown;
+}>) => Promise<Response<{
+    message: string;
+    sellers?: seller[];
+    error?: unknown;
+}, Record<string, any>>>;
 export declare const delete_seller: (req: Request, res: Response) => Promise<void>;
 export {};
 //# sourceMappingURL=seller.controller.d.ts.map
