@@ -10,10 +10,16 @@ export const create_category_schema = z.object({
     description: z.string().optional()
 })
 
+export const get_category_schema = z.object({
+    id: z.string()
+})
+
 type create_category_request = z.infer<typeof create_category_schema>
+type get_category_request = z.infer<typeof get_category_schema>
+
 interface category {
     name: string,
-     description: string | null,
+    description: string | null,
     id: string,
     created_at: Date,
     updated_at: Date,
@@ -42,6 +48,25 @@ export const create_category = async (req: Request<{}, {}, create_category_reque
         })
     }
 }
-export const get_category = async (req: Request, res: Response) => {}
+export const get_category = async (req: Request<{}, {}, get_category_request>, res: Response<{message: string, error?: unknown, category?: category}>) => {
+    const { id } = get_category_schema.parse(req.params)
+    try {
+        const category = await prisma.categories.findUnique({
+            where: {id}
+        })
+        if(!category) return res.status(404).json({
+            message: "Category not found"
+        })
+        return res.status(200).json({
+            message: "Category found successfully",
+            category
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal server error",
+            error
+        })
+    }
+}
 export const update_category = async (req: Request, res: Response) => {}
 export const delete_category = async (req: Request, res: Response) => {}
