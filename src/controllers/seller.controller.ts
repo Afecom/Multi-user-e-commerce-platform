@@ -10,7 +10,14 @@ export const get_seller_schema = z.object({
     email: z.email()
 })
 
+export const update_seller_schema = z.object({
+    description: z.string().optional(),
+    store_name: z.string().optional(),
+    email: z.email()
+})
+
 type get_seller_request = z.infer<typeof get_seller_schema>
+type update_seller_request = z.infer<typeof update_seller_schema> 
 type seller = {
     id: string
     created_at: Date
@@ -21,7 +28,30 @@ type seller = {
     rating: Decimal | null
 }
 
-export const update_seller = async (req: Request, res: Response) => {}
+export const update_seller = async (req: request<{}, {}, update_seller_request>, res: Response<{message: string, error?: unknown, seller?: seller}>): Promise<Response> => {
+    try {
+        const user = req.target_user
+        if(!user) return res.status(404).json({message: "A user was not found with the provided email"})
+        const { email, store_name, description } = req.body
+        if(!store_name && !description) return res.status(401).json({message: "Please provide a store name or description to update"})
+        const seller = await prisma.seller_profiles.update({
+            where: {seller_id: user.id},
+            data: {
+                ...(store_name && {store_name}),
+                ...(description && {description})
+            }
+        })
+        return res.status(201).json({
+            message: "Seller updated successfully",
+            seller
+        }) 
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal server error",
+            error
+        })
+    }
+}
 
 export const get_seller = async (req: request<{}, {}, get_seller_request>, res: Response<{message: string, seller?: seller, error?: unknown}>): Promise<Response> => {
     try {
