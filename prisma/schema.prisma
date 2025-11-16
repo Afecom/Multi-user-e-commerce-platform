@@ -40,7 +40,7 @@ model categories {
   seller             seller_profiles? @relation(fields: [seller_profiles_id], references: [id])
   seller_profiles_id String?
   name               String
-  descritpion        String?
+  description        String?
   created_at         DateTime         @default(now())
   updated_at         DateTime         @updatedAt
   product            products[]
