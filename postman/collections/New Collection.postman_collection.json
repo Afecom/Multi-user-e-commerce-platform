@@ -15,7 +15,16 @@
       }
     },
     {
-      "name": "New Request",
+      "name": "Update categories",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": ""
+        }
+      }
+    },
+    {
+      "name": "Delete category",
       "request": {
         "method": "GET",
         "url": {

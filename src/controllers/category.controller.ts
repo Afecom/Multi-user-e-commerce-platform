@@ -97,4 +97,19 @@ export const update_category = async (req: Request, res: Response<{message: stri
         })
     }
 }
-export const delete_category = async (req: Request, res: Response) => {}
+export const delete_category = async (req: Request<{}, {}, get_category_request>, res: Response<{message: string, error?: unknown}>) => {
+    const { id } = get_category_schema.parse(req.body)
+    try {
+        await prisma.categories.delete({
+            where: {id}
+        })
+        return res.status(203).json({
+            message: "Category deleted successfully"
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal server error",
+            error
+        })
+    }
+}
