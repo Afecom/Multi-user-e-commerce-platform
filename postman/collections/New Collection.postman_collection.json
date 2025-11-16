@@ -6,6 +6,15 @@
   },
   "item": [
     {
+      "name": "Get category",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": ""
+        }
+      }
+    },
+    {
       "name": "New Request",
       "request": {
         "method": "GET",

@@ -9,5 +9,6 @@ const category_router = Router()
 
 category_router.post('/', validate(create_category_schema), seller_admin_access, create_category)
 category_router.get('/:id', get_category)
+category_router.patch('/', update_category)
 
 export default category_router

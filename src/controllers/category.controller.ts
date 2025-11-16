@@ -14,6 +14,13 @@ export const get_category_schema = z.object({
     id: z.string()
 })
 
+export const update_category_schema = z.object({
+    id: z.string(),
+    name: z.string().optional(),
+    description: z.string().optional(),
+    seller_profile_id: z.string().optional()
+})
+
 type create_category_request = z.infer<typeof create_category_schema>
 type get_category_request = z.infer<typeof get_category_schema>
 
@@ -68,5 +75,26 @@ export const get_category = async (req: Request<{}, {}, get_category_request>, r
         })
     }
 }
-export const update_category = async (req: Request, res: Response) => {}
+export const update_category = async (req: Request, res: Response<{message: string, error?: unknown, category?: category}>): Promise<Response> => {
+    const { name, description, seller_profile_id, id} = update_category_schema.parse(req.body)
+    try {
+        const updated = await prisma.categories.update({
+            where: {id},
+            data: {
+                ...(name !== undefined && {name}),
+                ...(description !== undefined && {description}),
+                ...(seller_profile_id !== undefined && {seller_profile_id})
+            }
+        })
+        return res.status(200).json({
+            message: "Category updated successfully",
+            category: updated
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal server error",
+            error
+        })
+    }
+}
 export const delete_category = async (req: Request, res: Response) => {}
