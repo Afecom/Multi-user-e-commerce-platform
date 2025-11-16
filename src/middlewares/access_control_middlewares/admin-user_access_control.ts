@@ -28,7 +28,6 @@ export const admin_self_user_access = async (req: request<{}, {}, {email: string
         const user_role = decoded.user_role
         const user = await prisma.users.findUnique({where: {email}})
         if(!user) return res.status(404).json({message: "A user was not found with the provided email"})
-        console.log("Passed")
         const { password_hash, ...rest_user } = user
         req.target_user = rest_user
         if(user_role === "admin") return next()

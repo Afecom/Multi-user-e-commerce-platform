@@ -59,7 +59,7 @@ type user_login_response = {
 export const sign_up = async (req: Request<{}, {}, create_user_request>, res: Response<{message: string, user?: user, error?: unknown}>): Promise<Response> => {
     const { first_name, last_name, email, password, role, store_name, description} = req.body
     try {
-        if (role === "seller" && (!store_name || store_name.trim() === "" || !description)) return res.status(400).json({message: "Seller profile creation requires store name to be provided"})
+        if (role === "seller" && (!store_name || store_name.trim() === "" || !description)) return res.status(400).json({message: "Seller profile creation requires store name and description to be provided"})
         const existing_user = await prisma.users.findUnique({where: {email}})
         if(existing_user) return res.status(400).json({message: "User already exists with the provided email"})
         const hashed_password = await hash_password(password)

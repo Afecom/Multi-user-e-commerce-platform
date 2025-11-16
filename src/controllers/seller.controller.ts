@@ -82,8 +82,11 @@ export const delete_seller = async (req: request<{}, {}, get_seller_request>, re
     try {
         const user = req.target_user
         if(!user) return res.status(404).json({message: "A user was not found with the provided email"})
-        await prisma.seller_profiles.delete({
-            where: {seller_id: user.id}
+        const seller = await prisma.seller_profiles.findUnique({where: {seller_id: user.id}})
+        if(!seller) return res.status(404).json({message: "Seller profile not found"})
+        await prisma.$transaction(async (tx) => {
+            await tx.seller_profiles.delete({where: {seller_id: user.id}})
+            await tx.users.delete({where: {email: user.email}})
         })
         return res.status(203).json({
             message: "Seller Profile deleted successfully"
