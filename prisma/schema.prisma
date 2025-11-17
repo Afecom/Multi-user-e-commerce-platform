@@ -48,14 +48,14 @@ model categories {
 
 model products {
   id          String          @id @default(uuid())
-  seller      seller_profiles @relation(fields: [seller_id], references: [id])
-  seller_id   String
+  seller      seller_profiles @relation(fields: [seller_profiles_id], references: [id])
+  seller_profiles_id   String
   name        String
   description String
   stock       Int?
   image_URL   String
   price       Decimal
-  rating      Decimal
+  rating      Decimal?
   category    categories[]
   cart_items  cart_items[]
   orders      order_items[]

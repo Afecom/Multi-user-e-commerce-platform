@@ -4,17 +4,6 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient()
 
-export interface category_req<P = {}, ResBody = any, ReqBody = any> extends Request<P, ResBody, ReqBody> {
-    categories?: {
-        id: string,
-        name: string,
-        description: string | null,
-        seller_profiles_id: string | null,
-        created_at: Date;
-        updated_at: Date;
-    }[]
-}
-
 export const seller_admin_access = async (req: Request, res: Response<{message: string, error?: unknown}>, next: NextFunction) => {
     const token = req.headers.authorization?.split(" ")[1]
     if(!token) return res.status(400).json({message: "Please provide an access token inside the authorization field of your request header"})
@@ -33,7 +22,8 @@ export const seller_admin_access = async (req: Request, res: Response<{message: 
     }
 }
 
-export const seller_or_admin = async (req: category_req, res: Response, next: NextFunction) => {
+export const seller_or_admin = async (req: Request, res: Response, next: NextFunction) => {
+    const entity = req.path.split('/')[3]
     const { id } = req.body
     const token = req.headers.authorization?.split(" ")[1]
     if(!token) return res.status(400).json({message: "Please provide an access token inside the authorization field of your request"})
@@ -49,9 +39,16 @@ export const seller_or_admin = async (req: category_req, res: Response, next: Ne
                 }
             })
             if(!seller_profile) return res.status(404).json({message: "A seller profile is not found for the provided user"})
-            const category = await prisma.categories.findUnique({where: {id}})
-            if(!category) return res.status(404).json({message: "Category not found"})
-            if(category.seller_profiles_id !== seller_profile.id) return res.status(403).json({message: "Unauthorized to access the resource"})
+            if(entity === "categories"){
+                const category = await prisma.categories.findUnique({where: {id}})
+                if(!category) return res.status(404).json({message: "Category not found"})
+                if(category.seller_profiles_id !== seller_profile.id) return res.status(403).json({message: "Unauthorized to access the resource"})
+            }
+            else if(entity === "products"){
+                const product = await prisma.products.findUnique({where: {id}})
+                if(!product) return res.status(404).json({message: "Product not found with the provided ID"})
+                if(product.seller_profiles_id !== seller_profile.id) return res.status(403).json({message: "Unauthorized to access the resource"})
+            }
             return next()
         }
         return res.status(403).json({

@@ -1,14 +1,14 @@
 import type { Request, Response } from "express";
-import type { category_req } from "../middlewares/access_control_middlewares/category_access_control.js";
 import { PrismaClient } from "@prisma/client";
-import { z } from 'zod'
+import { string, z } from 'zod'
 
 const prisma = new PrismaClient()
 
 export const create_category_schema = z.object({
     seller_id: z.string().optional(),
     name: z.string().min(5, "Name is required"),
-    description: z.string().optional()
+    description: z.string().optional(),
+    product_ids: z.array(string()).optional()
 })
 
 export const get_category_schema = z.object({
@@ -36,13 +36,21 @@ interface category {
 
 
 export const create_category = async (req: Request<{}, {}, create_category_request>, res: Response<{message: string, error?: unknown, category?: category}>) => {
-    const { seller_id, name, description } = create_category_schema.parse(req.body)
+    const { seller_id, name, description, product_ids } = create_category_schema.parse(req.body)
     try {
         const category = await prisma.categories.create({
             data: {
                 name,
                 ...(seller_id !== undefined && {seller_profiles_id: seller_id}),
-                ...(description !== undefined && {description})
+                ...(description !== undefined && {description}),
+                ...(product_ids !== undefined && {
+                    product: {
+                        connect:product_ids.map((id) => ({id}))
+                    }
+                })
+            },
+            include: {
+                product: true
             }
         })
         return res.status(201).json({
@@ -76,7 +84,7 @@ export const get_category = async (req: Request<{}, {}, get_category_request>, r
         })
     }
 }
-export const update_category = async (req: category_req, res: Response<{message: string, error?: unknown, category?: category}>): Promise<Response> => {
+export const update_category = async (req: Request, res: Response<{message: string, error?: unknown, category?: category}>): Promise<Response> => {
     const { name, description, seller_profiles_id, id} = update_category_schema.parse(req.body)
     try {
         const updated_category = await prisma.categories.update({
@@ -98,7 +106,7 @@ export const update_category = async (req: category_req, res: Response<{message:
         })
     }
 }
-export const delete_category = async (req: category_req<{}, {}, get_category_request>, res: Response<{message: string, error?: unknown}>) => {
+export const delete_category = async (req: Request<{}, {}, get_category_request>, res: Response<{message: string, error?: unknown}>) => {
     const { id } = get_category_schema.parse(req.body)
     try {
         await prisma.categories.delete({
