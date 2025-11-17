@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import type { category_req } from "../middlewares/access_control_middlewares/category_access_control.js";
 import { PrismaClient } from "@prisma/client";
 import { z } from 'zod'
 
@@ -75,9 +76,12 @@ export const get_category = async (req: Request<{}, {}, get_category_request>, r
         })
     }
 }
-export const update_category = async (req: Request, res: Response<{message: string, error?: unknown, category?: category}>): Promise<Response> => {
+export const update_category = async (req: category_req, res: Response<{message: string, error?: unknown, category?: category}>): Promise<Response> => {
     const { name, description, seller_profile_id, id} = update_category_schema.parse(req.body)
     try {
+        const categories = req.categories
+        if(!categories) return res.status(404).json({message: "Category not found for the provided seller"})
+        // const category = categories.find()
         const updated = await prisma.categories.update({
             where: {id},
             data: {
@@ -97,7 +101,7 @@ export const update_category = async (req: Request, res: Response<{message: stri
         })
     }
 }
-export const delete_category = async (req: Request<{}, {}, get_category_request>, res: Response<{message: string, error?: unknown}>) => {
+export const delete_category = async (req: category_req<{}, {}, get_category_request>, res: Response<{message: string, error?: unknown}>) => {
     const { id } = get_category_schema.parse(req.body)
     try {
         await prisma.categories.delete({
