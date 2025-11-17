@@ -19,7 +19,8 @@ export const update_category_schema = z.object({
     id: z.string(),
     name: z.string().optional(),
     description: z.string().optional(),
-    seller_profiles_id: z.string().optional()
+    seller_profiles_id: z.string().optional(),
+    product_ids: z.array(string()).optional()
 })
 
 type create_category_request = z.infer<typeof create_category_schema>
@@ -85,14 +86,19 @@ export const get_category = async (req: Request<{}, {}, get_category_request>, r
     }
 }
 export const update_category = async (req: Request, res: Response<{message: string, error?: unknown, category?: category}>): Promise<Response> => {
-    const { name, description, seller_profiles_id, id} = update_category_schema.parse(req.body)
+    const { name, description, seller_profiles_id, id, product_ids} = update_category_schema.parse(req.body)
     try {
         const updated_category = await prisma.categories.update({
             where: {id},
             data: {
                 ...(name !== undefined && {name}),
                 ...(description !== undefined && {description}),
-                ...(seller_profiles_id !== undefined && {seller_profiles_id})
+                ...(seller_profiles_id !== undefined && {seller_profiles_id}),
+                ...(product_ids !== undefined && {
+                    product: {
+                        set: product_ids.map((id) => ({id}))
+                    }
+                })
             }
         })
         return res.status(201).json({
