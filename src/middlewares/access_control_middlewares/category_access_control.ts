@@ -34,6 +34,7 @@ export const seller_admin_access = async (req: Request, res: Response<{message: 
 }
 
 export const seller_or_admin = async (req: category_req, res: Response, next: NextFunction) => {
+    const { id } = req.body
     const token = req.headers.authorization?.split(" ")[1]
     if(!token) return res.status(400).json({message: "Please provide an access token inside the authorization field of your request"})
     try {
@@ -48,9 +49,9 @@ export const seller_or_admin = async (req: category_req, res: Response, next: Ne
                 }
             })
             if(!seller_profile) return res.status(404).json({message: "A seller profile is not found for the provided user"})
-            const categories = await prisma.categories.findMany({where: {seller_profiles_id: seller_profile.id}})
-            if(!categories) return res.status(404).json({message: "Couldn't find a category associated with the provided seller"})
-            req.categories = categories
+            const category = await prisma.categories.findUnique({where: {id}})
+            if(!category) return res.status(404).json({message: "Category not found"})
+            if(category.seller_profiles_id !== seller_profile.id) return res.status(403).json({message: "Unauthorized to access the resource"})
             return next()
         }
         return res.status(403).json({

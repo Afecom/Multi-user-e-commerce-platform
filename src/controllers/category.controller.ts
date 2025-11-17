@@ -19,7 +19,7 @@ export const update_category_schema = z.object({
     id: z.string(),
     name: z.string().optional(),
     description: z.string().optional(),
-    seller_profile_id: z.string().optional()
+    seller_profiles_id: z.string().optional()
 })
 
 type create_category_request = z.infer<typeof create_category_schema>
@@ -77,22 +77,19 @@ export const get_category = async (req: Request<{}, {}, get_category_request>, r
     }
 }
 export const update_category = async (req: category_req, res: Response<{message: string, error?: unknown, category?: category}>): Promise<Response> => {
-    const { name, description, seller_profile_id, id} = update_category_schema.parse(req.body)
+    const { name, description, seller_profiles_id, id} = update_category_schema.parse(req.body)
     try {
-        const categories = req.categories
-        if(!categories) return res.status(404).json({message: "Category not found for the provided seller"})
-        // const category = categories.find()
-        const updated = await prisma.categories.update({
+        const updated_category = await prisma.categories.update({
             where: {id},
             data: {
                 ...(name !== undefined && {name}),
                 ...(description !== undefined && {description}),
-                ...(seller_profile_id !== undefined && {seller_profile_id})
+                ...(seller_profiles_id !== undefined && {seller_profiles_id})
             }
         })
-        return res.status(200).json({
+        return res.status(201).json({
             message: "Category updated successfully",
-            category: updated
+            category: updated_category
         })
     } catch (error) {
         return res.status(500).json({
