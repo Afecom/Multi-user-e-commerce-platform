@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import { string, z } from 'zod'
 import { PrismaClient } from "@prisma/client";
-import { update_cart_item } from "./cart_item.controller.js";
 
 const prisma = new PrismaClient()
 
@@ -10,18 +9,21 @@ const cart_request_schema = z.object({
     product_id: z.string(),
     quantity: z.int()
 })
-const get_cart_request_schema = z.object({
+const get_cart_by_user_id_request_schema = z.object({
     user_id: string()
 })
-
 const update_cart_request_schema = z.object({
     id: string(),
     user_id: string()
 })
+const get_cart_by_id_request_schema = z.object({
+    id: z.string()
+})
 
 type cart_request = z.infer<typeof cart_request_schema>
-type get_cart_request = z.infer<typeof get_cart_request_schema>
+type get_cart_by_user_id_request = z.infer<typeof get_cart_by_user_id_request_schema>
 type update_cart_request = z.infer<typeof update_cart_request_schema>
+type get_cart_by_id_request = z.infer<typeof get_cart_by_id_request_schema>
 interface cart {
     user_id: string,
     id: string
@@ -32,7 +34,7 @@ interface cart {
 export const create_update_cart = async (req: Request<{}, {}, cart_request>, res: Response): Promise<Response> => {
     const { user_id, product_id, quantity } = cart_request_schema.parse(req.body)
     try {
-        const existing_cart = await prisma.carts.findUnique({where: {user_id}})
+        const existing_cart = await prisma.carts.findFirst({where: {user_id, status: "active"}})
         if(!existing_cart){
             const cart = await prisma.carts.create({
                 data: {user_id}
@@ -87,12 +89,31 @@ export const create_update_cart = async (req: Request<{}, {}, cart_request>, res
         })
     }
 }
-export const get_cart_by_id = async (req: Request<{}, {}, get_cart_request>, res: Response<{message: string, error?: unknown, cart?: cart}>): Promise<Response> => {
-    const { user_id } = get_cart_request_schema.parse(req.body)
+export const get_cart_by_user_id = async (req: Request<{}, {}, get_cart_by_user_id_request>, res: Response<{message: string, error?: unknown, cart?: cart[]}>): Promise<Response> => {
+    const { user_id } = get_cart_by_user_id_request_schema.parse(req.body)
+    try {
+        const cart = await prisma.carts.findMany({
+            where: {user_id},
+            include: {user: true, cart_items: true}
+        })
+        if(!cart) return res.status(404).json({message: "Cart not found with the provided ID"})
+        return res.status(200).json({
+            message: "Cart found successfully",
+            cart
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal server error",
+            error
+        })
+    }
+}
+export const get_cart_by_id = async (req: Request<{}, {}, get_cart_by_id_request>, res: Response<{message: string, error?: unknown, cart?: cart}>): Promise<Response> => {
+    const { id } = get_cart_by_id_request_schema.parse(req.body)
     try {
         const cart = await prisma.carts.findUnique({
-            where: {user_id},
-            include: {user: true}
+            where: {id},
+            include: {user: true, cart_items: true}
         })
         if(!cart) return res.status(404).json({message: "Cart not found with the provided ID"})
         return res.status(200).json({
@@ -124,10 +145,10 @@ export const update_cart = async (req: Request<{}, {}, update_cart_request>, res
         })
     }
 }
-export const delete_cart = async (req: Request<{}, {}, get_cart_request>, res: Response<{message: string, error?: unknown}>): Promise<Response> => {
-    const { user_id } = get_cart_request_schema.parse(req.body)
-    try {
-        await prisma.carts.delete({where: {user_id}})
+export const delete_cart = async (req: Request<{}, {}, get_cart_by_id_request>, res: Response<{message: string, error?: unknown}>): Promise<Response> => {
+    const { id } = get_cart_by_id_request_schema.parse(req.body)
+    try{
+        await prisma.carts.delete({where: {id}})
         return res.status(203).json({
             message: "Cart deleted successfully"
         })

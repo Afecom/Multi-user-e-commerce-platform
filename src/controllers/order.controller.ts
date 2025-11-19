@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { int, string, z } from 'zod'
 import { PrismaClient } from "@prisma/client";
+import { create_order } from "../services/create_order.js";
 
 const prisma = new PrismaClient()
 
@@ -53,4 +54,16 @@ export const get_orders_by_id = async (req: Request<{}, {}, get_orders_by_id_req
 
 export const checkout = async (req: Request<{}, {}, checkout_request>, res: Response) => {
     const { user_id } = checkout_request_schema.parse(req.body)
+    try {
+        const order = await create_order(user_id)
+        return res.status(201).json({
+            message: "Order places successfully",
+            order
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal server error",
+            error
+        })
+    }
 }

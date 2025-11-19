@@ -67,9 +67,10 @@ model products {
 model carts {
   id         String       @id @default(uuid())
   user       users        @relation(fields: [user_id], references: [id])
-  user_id    String       @unique
+  user_id    String       
   created_at DateTime     @default(now())
   updated_at DateTime     @updatedAt
+  status     cart_status  @default(active)
   cart_items cart_items[]
 }
 
@@ -149,4 +150,10 @@ enum user_role {
   customer
   admin
   seller
+}
+
+enum cart_status {
+  active
+  checked_out
+  cancelled
 }
