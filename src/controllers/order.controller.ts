@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { z } from 'zod'
+import { int, string, z } from 'zod'
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient()
@@ -10,9 +10,13 @@ const get_orders_by_user_id_schema = z.object({
 const get_orders_by_id_schema = z.object({
     id: z.string()
 })
+const checkout_request_schema = z.object({
+    user_id: z.string(),
+})
 
 type get_orders_by_user_id_request = z.infer<typeof get_orders_by_user_id_schema>
 type get_orders_by_id_request = z.infer<typeof get_orders_by_id_schema>
+type checkout_request = z.infer<typeof checkout_request_schema>
 
 export const get_orders_by_user_id = async (req: Request<{}, {}, get_orders_by_user_id_request>, res: Response): Promise<Response> => {
     const { user_id } = get_orders_by_user_id_schema.parse(req.body)
@@ -45,4 +49,8 @@ export const get_orders_by_id = async (req: Request<{}, {}, get_orders_by_id_req
             error
         })
     }
+}
+
+export const checkout = async (req: Request<{}, {}, checkout_request>, res: Response) => {
+    const { user_id } = checkout_request_schema.parse(req.body)
 }
