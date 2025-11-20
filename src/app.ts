@@ -1,4 +1,5 @@
 import express from 'express'
+import cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import index_router from './routes/index.route.js'
 import dotenv from 'dotenv'
@@ -9,6 +10,15 @@ const prisma = new PrismaClient()
 const app = express()
 
 app.use(express.json())
+const frontendOrigin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173'
+app.use(
+    cors({
+        origin: frontendOrigin,
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true,
+    })
+)
 app.use('/api/v1', index_router)
 app.use('/', (req, res) => {
     res.send("Hello world")
