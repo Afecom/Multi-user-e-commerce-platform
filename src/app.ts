@@ -10,7 +10,7 @@ const prisma = new PrismaClient()
 const app = express()
 
 app.use(express.json())
-const frontendOrigin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173'
+const frontendOrigin = process.env.FRONTEND_ORIGIN ?? 'https://multi-user-e-commerce-platform-fron.vercel.app/'
 app.use(
     cors({
         origin: frontendOrigin,
