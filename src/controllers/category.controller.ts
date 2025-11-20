@@ -16,7 +16,6 @@ export const get_category_schema = z.object({
 })
 
 export const update_category_schema = z.object({
-    id: z.string(),
     name: z.string().optional(),
     description: z.string().optional(),
     seller_profiles_id: z.string().optional(),
@@ -65,7 +64,7 @@ export const create_category = async (req: Request<{}, {}, create_category_reque
         })
     }
 }
-export const get_category = async (req: Request<{}, {}, get_category_request>, res: Response<{message: string, error?: unknown, category?: category}>) => {
+export const get_category = async (req: Request, res: Response<{message: string, error?: unknown, category?: category}>) => {
     const { id } = get_category_schema.parse(req.params)
     try {
         const category = await prisma.categories.findUnique({
@@ -86,7 +85,8 @@ export const get_category = async (req: Request<{}, {}, get_category_request>, r
     }
 }
 export const update_category = async (req: Request, res: Response<{message: string, error?: unknown, category?: category}>): Promise<Response> => {
-    const { name, description, seller_profiles_id, id, product_ids} = update_category_schema.parse(req.body)
+    const { id } = get_category_schema.parse(req.params)
+    const { name, description, seller_profiles_id, product_ids} = update_category_schema.parse(req.body)
     try {
         const updated_category = await prisma.categories.update({
             where: {id},
@@ -112,8 +112,8 @@ export const update_category = async (req: Request, res: Response<{message: stri
         })
     }
 }
-export const delete_category = async (req: Request<{}, {}, get_category_request>, res: Response<{message: string, error?: unknown}>) => {
-    const { id } = get_category_schema.parse(req.body)
+export const delete_category = async (req: Request<{id: string}>, res: Response<{message: string, error?: unknown}>) => {
+    const { id } = get_category_schema.parse(req.params)
     try {
         await prisma.categories.delete({
             where: {id}

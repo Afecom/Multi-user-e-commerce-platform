@@ -15,9 +15,9 @@ export interface request<P = {}, ResBody = any, ReqBody = any> extends Request<P
     }
 }
 
-export const admin_self_user_access = async (req: request<{}, {}, {email: string}>, res: Response<{message: string, error?: unknown}>, next: NextFunction) => {
-    const { email } = req.body
-    if(!email) return res.status(400).json({message: "Please provide the email of the user you want to fetch in your request body"})
+export const admin_self_user_access = async (req: request<{}, {}, {email?: string}>, res: Response<{message: string, error?: unknown}>, next: NextFunction) => {
+    const email = req.body.email ?? req.query.email
+    if(!email || typeof email !== "string") return res.status(400).json({message: "Please provide the email of the user you want to fetch in your request"})
     const auth = req.headers.authorization
     if(!auth) return res.status(400).json({message: "Please provide an auth token inside the header of your request"})
     const token = auth.split(" ")[1]

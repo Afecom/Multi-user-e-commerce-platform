@@ -7,8 +7,8 @@ import { create_product_schema, get_product_schema, update_product_schema } from
 const product_router = Router()
 
 product_router.post('/', validate(create_product_schema), seller_admin_access, create_product)
-product_router.get('/', validate(get_product_schema), get_product)
-product_router.patch('/', validate(update_product_schema), seller_or_admin, update_product)
-product_router.delete('/', validate(get_product_schema), seller_or_admin, delete_product)
+product_router.get('/:id', validate(get_product_schema, "params"), get_product)
+product_router.patch('/:id', validate(get_product_schema, "params"), seller_or_admin("products"), validate(update_product_schema), update_product)
+product_router.delete('/:id', validate(get_product_schema, "params"), seller_or_admin("products"), delete_product)
 
 export default product_router

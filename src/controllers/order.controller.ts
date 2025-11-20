@@ -1,17 +1,17 @@
 import type { Request, Response } from "express";
-import { int, string, z } from 'zod'
+import { z } from 'zod'
 import { PrismaClient } from "@prisma/client";
 import { create_order } from "../services/create_order.js";
 
 const prisma = new PrismaClient()
 
-const get_orders_by_user_id_schema = z.object({
+export const get_orders_by_user_id_schema = z.object({
     user_id: z.string()
 })
-const get_orders_by_id_schema = z.object({
+export const get_orders_by_id_schema = z.object({
     id: z.string()
 })
-const checkout_request_schema = z.object({
+export const checkout_request_schema = z.object({
     user_id: z.string(),
 })
 
@@ -19,8 +19,8 @@ type get_orders_by_user_id_request = z.infer<typeof get_orders_by_user_id_schema
 type get_orders_by_id_request = z.infer<typeof get_orders_by_id_schema>
 type checkout_request = z.infer<typeof checkout_request_schema>
 
-export const get_orders_by_user_id = async (req: Request<{}, {}, get_orders_by_user_id_request>, res: Response): Promise<Response> => {
-    const { user_id } = get_orders_by_user_id_schema.parse(req.body)
+export const get_orders_by_user_id = async (req: Request<{user_id: string}>, res: Response): Promise<Response> => {
+    const { user_id } = get_orders_by_user_id_schema.parse(req.params)
     try {
         const orders = await prisma.orders.findMany({where: {user_id}})
         if(!orders) return res.status(404).json({message: "Couldn't find orders associated with the user"})
@@ -35,8 +35,8 @@ export const get_orders_by_user_id = async (req: Request<{}, {}, get_orders_by_u
         })
     }
 }
-export const get_orders_by_id = async (req: Request<{}, {}, get_orders_by_id_request>, res: Response): Promise<Response> => {
-    const { id } = get_orders_by_id_schema.parse(req.body)
+export const get_orders_by_id = async (req: Request<{id: string}>, res: Response): Promise<Response> => {
+    const { id } = get_orders_by_id_schema.parse(req.params)
     try {
         const order = await prisma.orders.findUnique({where: {id}})
         if(!order) return res.status(404).json({message: "Couldn't find an order with the provided ID"})

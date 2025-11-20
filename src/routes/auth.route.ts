@@ -8,7 +8,7 @@ import { role_checkpoint } from '../middlewares/auth_middlewares/auth.middleware
 const auth_router: Router = express.Router()
 
 auth_router.post('/', validate(create_user_schema), sign_up)
-auth_router.get('/', validate(get_user_schema), get_user)
+auth_router.get('/', validate(get_user_schema, "query"), get_user)
 auth_router.get('/users', role_checkpoint("admin"), get_all_users)
 auth_router.post('/login', validate(login_user_schema), login)
 

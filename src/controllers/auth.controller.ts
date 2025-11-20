@@ -155,8 +155,8 @@ export const update_user = async (req: Request<{}, {}, update_user_request>, res
         })
     }
 }
-export const get_user = async (req: Request<{}, {}, get_user_request>, res: Response<{user?: user, message: string, error?: unknown}>): Promise<Response> => {
-    const { email } = req.body
+export const get_user = async (req: Request<{}, {}, {}, get_user_request>, res: Response<{user?: user, message: string, error?: unknown}>): Promise<Response> => {
+    const { email } = get_user_schema.parse(req.query)
     try {
         const user = await prisma.users.findUnique({
             where: { email }

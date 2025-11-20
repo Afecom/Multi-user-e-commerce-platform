@@ -19,7 +19,6 @@ export const get_product_schema = z.object({
 })
 
 export const update_product_schema = z.object({
-    id: z.string(),
     seller_profiles_id: z.string().optional(),
     name: z.string().optional(),
     description: z.string().min(20, "Minimum length of description should be 20").optional(),
@@ -88,8 +87,8 @@ export const create_product = async (req: Request<{}, {}, create_product_request
         })
     }
 }
-export const get_product = async (req: Request<{}, {}, get_product_request>, res: Response<{message: string, error?: unknown, product?: product}>): Promise<Response> => {
-    const { id } = get_product_schema.parse(req.body)
+export const get_product = async (req: Request<{id: string}>, res: Response<{message: string, error?: unknown, product?: product}>): Promise<Response> => {
+    const { id } = get_product_schema.parse(req.params)
     try {
         const product = await prisma.products.findUnique({where: {id}})
         if(!product) return res.status(404).json({message: "Product not found with the provided ID"})
@@ -116,8 +115,9 @@ export const get_product = async (req: Request<{}, {}, get_product_request>, res
         })
     }
 }
-export const update_product = async (req: Request<{}, {}, update_category_request>, res: Response<{message: string, error?: unknown, product?: product}>): Promise<Response> => {
-    const { seller_profiles_id, stock, name, description, price, category_ids, image_URL, id } = update_product_schema.parse(req.body)
+export const update_product = async (req: Request<{id: string}, {}, update_category_request>, res: Response<{message: string, error?: unknown, product?: product}>): Promise<Response> => {
+    const { id } = get_product_schema.parse(req.params)
+    const { seller_profiles_id, stock, name, description, price, category_ids, image_URL } = update_product_schema.parse(req.body)
     try {
         const updated = await prisma.products.update({
             where: {id},
@@ -140,12 +140,12 @@ export const update_product = async (req: Request<{}, {}, update_category_reques
             seller_profiles_id: updated.seller_profiles_id,
             stock: updated.stock,
             name: updated.name,
-            description: updated.name,
+            description: updated.description,
             price: Number(updated.price),
             updated_at: updated.updated_at,
             created_at: updated.created_at,
             image_URL: updated.image_URL,
-            rating: Number(updated.rating)
+            rating: updated.rating !== null ? Number(updated.rating) : null
         }
         return res.status(200).json({
             message: "Product updated successfully",
@@ -158,8 +158,8 @@ export const update_product = async (req: Request<{}, {}, update_category_reques
        }) 
     }
 }
-export const delete_product = async (req: Request<{}, {}, get_product_request>, res: Response<{message: string, error?: unknown}>): Promise<Response> => {
-    const { id } = get_product_schema.parse(req.body)
+export const delete_product = async (req: Request<{id: string}>, res: Response<{message: string, error?: unknown}>): Promise<Response> => {
+    const { id } = get_product_schema.parse(req.params)
     try {
         await prisma.products.delete({where: {id}})
         return res.status(203).json({

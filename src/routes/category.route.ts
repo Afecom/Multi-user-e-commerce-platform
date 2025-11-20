@@ -7,8 +7,8 @@ import { create_category_schema, get_category_schema, update_category_schema } f
 const category_router = Router()
 
 category_router.post('/', validate(create_category_schema), seller_admin_access, create_category)
-category_router.get('/:id', validate(get_category_schema), get_category)
-category_router.patch('/', validate(update_category_schema), seller_or_admin, update_category)
-category_router.delete('/', validate(get_category_schema), seller_or_admin, delete_category)
+category_router.get('/:id', validate(get_category_schema, "params"), get_category)
+category_router.patch('/:id', validate(get_category_schema, "params"), seller_or_admin("categories"), validate(update_category_schema), update_category)
+category_router.delete('/:id', validate(get_category_schema, "params"), seller_or_admin("categories"), delete_category)
 
 export default category_router

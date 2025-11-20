@@ -4,16 +4,15 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient()
 
-const create_cart_item_request_schema = z.object({
+export const create_cart_item_request_schema = z.object({
     cart_id: z.string(),
     product_id: string(),
     quantity: z.int()
 })
-const get_cart_item_request_schema = z.object({
+export const get_cart_item_request_schema = z.object({
     id: z.string()
 })
-const update_cart_item_request_schema = z.object({
-    id: z.string(),
+export const update_cart_item_request_schema = z.object({
     cart_id: z.string().optional(),
     product_id: z.string().optional(),
     quantity: z.int().optional()
@@ -52,8 +51,8 @@ export const create_cart_item = async (req: Request<{}, {}, create_cart_item_req
         })
     }
 }
-export const get_cart_item_by_id = async (req: Request<{}, {}, get_cart_item_request>, res: Response<{message: string, error?: unknown, cart_item?: cart_item}>): Promise<Response> => {
-    const { id } = get_cart_item_request_schema.parse(req.body)
+export const get_cart_item_by_id = async (req: Request<{id: string}>, res: Response<{message: string, error?: unknown, cart_item?: cart_item}>): Promise<Response> => {
+    const { id } = get_cart_item_request_schema.parse(req.params)
     try {
         const cart_item = await prisma.cart_items.findUnique({where: {id}})
         if(!cart_item) return res.status(404).json({message: "A cart item was not found with the provided ID"})
@@ -68,8 +67,9 @@ export const get_cart_item_by_id = async (req: Request<{}, {}, get_cart_item_req
        }) 
     }
 }
-export const update_cart_item = async (req: Request<{}, {}, update_cart_item_request>, res: Response<{message: string, error?: unknown, cart_item?: cart_item}>): Promise<Response> => {
-    const { id, cart_id, product_id, quantity } = update_cart_item_request_schema.parse(req.body)
+export const update_cart_item = async (req: Request<{id: string}, {}, update_cart_item_request>, res: Response<{message: string, error?: unknown, cart_item?: cart_item}>): Promise<Response> => {
+    const { id } = get_cart_item_request_schema.parse(req.params)
+    const { cart_id, product_id, quantity } = update_cart_item_request_schema.parse(req.body)
     try {
         const updated_cart_item = await prisma.cart_items.update({
             where: {id},
@@ -90,8 +90,8 @@ export const update_cart_item = async (req: Request<{}, {}, update_cart_item_req
         })
     }
 }
-export const delete_cart_item = async (req: Request<{}, {}, get_cart_item_request>, res: Response<{message: string, error?: unknown}>): Promise<Response> => {
-    const { id } = get_cart_item_request_schema.parse(req.body)
+export const delete_cart_item = async (req: Request<{id: string}>, res: Response<{message: string, error?: unknown}>): Promise<Response> => {
+    const { id } = get_cart_item_request_schema.parse(req.params)
     try {
         await prisma.cart_items.delete({where: {id}})
         return res.status(203).json({
