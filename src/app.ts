@@ -10,8 +10,6 @@ const prisma = new PrismaClient()
 const app = express()
 
 app.use(express.json())
-// Build allowed origins list: include common local dev origins and any
-// origin(s) provided in FRONTEND_ORIGIN env var (comma-separated).
 const defaultDevOrigins = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
@@ -22,15 +20,14 @@ const envOrigins = rawFrontendEnv
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
-    .map((s) => s.replace(/^'+|'+$/g, '')) // strip single quotes if present
-    .map((s) => s.replace(/\/$/, '')) // remove trailing slash
+    .map((s) => s.replace(/^'+|'+$/g, '')) 
+    .map((s) => s.replace(/\/$/, ''))
 
 const allowedOrigins = Array.from(new Set([...defaultDevOrigins, ...envOrigins]))
 
 app.use(
     cors({
         origin: (origin, cb) => {
-            // Allow non-browser requests (Postman, curl) when no origin is set
             if (!origin) return cb(null, true)
             if (allowedOrigins.includes(origin)) return cb(null, true)
             return cb(new Error('CORS policy: origin not allowed'), false)
